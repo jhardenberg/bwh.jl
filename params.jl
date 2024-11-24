@@ -34,4 +34,4 @@ nout  = 5000  # how often to print stats
 nouta = 500  # how often to save animation
 noutf = 500  # how often to save netcdf file
 
-dtstep = 0.001  # time step. If set to 0.0 the it is
+dtstep = 0.001  # time step. If set to 0.0 the code will estimate the time step
