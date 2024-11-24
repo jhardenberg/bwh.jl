@@ -29,8 +29,8 @@ w_mean = 1.5  # mean value of w
 w_rand = 0.0  # amplitude of perturbation
 
 # Time loop
-nt         = 150000       # Number of time steps
-nout = 5000  # how often to print stats
+nt    = 150000       # Number of time steps
+nout  = 5000  # how often to print stats
 nouta = 500  # how often to save animation
 noutf = 500  # how often to save netcdf file
 
