@@ -41,10 +41,11 @@ function bwh()
     @changeprecision float_type begin  # fix for Metal (GPU on Mac). All in single precision.
 
     include("params.jl")
-    
-    dx, dy = lx/(nx-2), ly/(ny-2)  # Space steps in x and y dimensions
-    dt = dtstep
 
+    nx, ny = numx + 2, numy + 2   # add 2 to each dimension for ghost cells
+    dx, dy = lx/numx, ly/numy  # Space steps in x and y dimensions
+    dt = dtstep  # we have to copy it for crazy julia scope restrictions
+    
     # Array initializations. Use @zeros, @ones or @rand
     b = b_rand *@rand(nx, ny) .+ b_mean
     w = w_rand *@rand(nx, ny) .+ w_mean
@@ -53,10 +54,10 @@ function bwh()
     w2 = @zeros(nx, ny);  # Temporary array for w
 
     dte = min(dx^2,dy^2)/dw/8.1   # estimate time step
-    println("Estimated dt = ", dte)
     if dt == 0.0  # if dt is not set, use the estimated value
         dt = dte
     end
+    println("Estimated dt = ", dte)
     println("Selected dt = ", dt)
 
     # this will be for MPI

@@ -20,7 +20,7 @@ p = 1.55            # precipitation rate
 lx, ly = 340, 340   # Length of domain in dimensions x, y
 
 # Numerics
-nx, ny = 340 + 2, 340 + 2   # Number of gridpoints dimensions x, y - add 2 to each dimension for ghost cells
+numx, numy = 340, 340   # Number of gridpoints in x, y
 
 # Initialization
 b_mean = 0.4  # mean value of b
@@ -29,9 +29,9 @@ w_mean = 1.5  # mean value of w
 w_rand = 0.0  # amplitude of perturbation
 
 # Time loop
-nt    = 150000       # Number of time steps
-nout  = 5000  # how often to print stats
-nouta = 500  # how often to save animation
-noutf = 500  # how often to save netcdf file
+nt    = 150000  # Number of time steps
+nout  = 5000    # how often to print stats
+nouta = 500     # how often to save animation
+noutf = 500     # how often to save netcdf file
 
 dtstep = 0.001  # time step. If set to 0.0 the code will estimate the time step
