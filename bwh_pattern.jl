@@ -12,7 +12,6 @@ using ChangePrecision
 using GPUArraysCore  #needed for fix for Metal
 using Plots
 using Printf
-using NetCDF
 
 @static if USE_GPU
     @initl_parallel_stencil(Metal, Float32, 2);
@@ -41,51 +40,27 @@ function bwh()
 
     @changeprecision float_type begin  # fix for Metal (GPU on Mac). All in single precision.
 
-    # Filenames
-    filename_nc = "zelnik.nc"
-    filename_anim = "zelnik.gif"
+    include("params.jl")
     
-    # Zelnik et al. parameters
-
-    # Physics
-    η = 2.8             # root augmentation
-    λ = 0.4571428          # soil water consumption rate
-    ρ = 0.7             # shading parameter
-    ν = 1.470588          # soil water evaporation rate
-
-    db = 1.0            # b diffusivity
-    dw = 125.0        # w diffusivity
-
-    p = 1.55           # precipitation rate
-
-    lx, ly = 340, 340   # Length of domain in dimensions x, y
-
-    # Numerics
-    nx, ny = 340+2, 340+2   # Number of gridpoints dimensions x, y 
-
-    # this will be for MPI
-    #me, dims, nprocs, coords   = init_global_grid(nx, ny, 1, periodx=1, periody=1);
-
     dx, dy = lx/(nx-2), ly/(ny-2)  # Space steps in x and y dimensions
+    dt = dtstep
 
-    # Array initializations
-    b = 0.6 *@rand(nx, ny) .+ 0.1
-    w = @zeros(nx, ny) .+ 1.5
+    # Array initializations. Use @zeros, @ones or @rand
+    b = b_rand *@rand(nx, ny) .+ b_mean
+    w = w_rand *@rand(nx, ny) .+ w_mean
 
     b2 = @zeros(nx, ny);  # Temporary array for b
     w2 = @zeros(nx, ny);  # Temporary array for w
 
-    # Time loop
-
-    nt         = 150000       # Number of time steps
-    nout = 5000  # how often to print stats
-    nouta = 500  # how often to save animation
-    noutf = 500  # how often to save netcdf file
-
-    dt = min(dx^2,dy^2)/dw/8.1   # estimate time step
-    println("Estimated dt = ", dt)
-    dt = 0.001
+    dte = min(dx^2,dy^2)/dw/8.1   # estimate time step
+    println("Estimated dt = ", dte)
+    if dt == 0.0  # if dt is not set, use the estimated value
+        dt = dte
+    end
     println("Selected dt = ", dt)
+
+    # this will be for MPI
+    #me, dims, nprocs, coords   = init_global_grid(nx, ny, 1, periodx=1, periody=1);
 
     println("Simulation parameters: p=", p, " η=", η, " λ=", λ, " ρ=", ρ, " ν=", ν, " db=", db, " dw=", dw, " dt=", dt, " dx=", dx, " dy=", dy)
 
