@@ -16,6 +16,9 @@ dw = 125.0          # w diffusivity
 
 p = 1.55            # precipitation rate
 
+# Network disturbance
+ϕ = 0.25            # fraction of disturbed links
+
 # Domain size
 lx, ly = 340, 340   # Length of domain in dimensions x, y
 
@@ -29,7 +32,7 @@ w_mean = 1.5  # mean value of w
 w_rand = 0.0  # amplitude of perturbation
 
 # Time loop
-nt    = 150000  # Number of time steps
+nt    = 250000  # Number of time steps
 nout  = 5000    # how often to print stats
 nouta = 500     # how often to save animation
 noutf = 500     # how often to save netcdf file

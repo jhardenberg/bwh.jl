@@ -5,6 +5,7 @@ const USE_GPU = false  # flag for GPU - does not work with Metal on Mac
 const GPU_TYPE = "Metal"  # "CUDA", "AMDGPU" or "Metal"
 const flag_netcdf = true  # flag for netcdf output
 const flag_ani = false  # flag for animation
+const flag_disturbance = false  # flag for network disturbance
 
 #using ImplicitGlobalGrid   # this will be for MPI
 using ParallelStencil
@@ -34,6 +35,7 @@ include("integrate_zelnik.jl")
 include("ghost.jl")
 include("plotting.jl")
 include("netcdf.jl")
+include("disturbance.jl")
 
 function to_netcdf(fname, b, w, tim; mode="a")
     data = Dict(
@@ -74,6 +76,11 @@ function bwh()
 
     println("Simulation parameters: p=", p, " η=", η, " λ=", λ, " ρ=", ρ, " ν=", ν, " db=", db, " dw=", dw, " dt=", dt, " dx=", dx, " dy=", dy)
 
+    if flag_disturbance
+        n_x, n_y, w_l = make_disturbed_links(nx, ny, dx, dy, ϕ)
+        w_l = @ones(nx, ny)/(dx*dy)  # Do not weight with distance
+    end
+
     # Preparation of visualisation
     if flag_ani
         ENV["GKSwstype"]="nul";
@@ -96,6 +103,10 @@ function bwh()
     for it = 1:nt
         @parallel update_b!(b2, b, w, p, η, λ, ρ, ν, db, dw, dt, dx, dy)
         @parallel update_w!(w2, b, w, p, η, λ, ρ, ν, db, dw, dt, dx, dy)
+
+        if flag_disturbance
+            @parallel (2:(nx-1), 2:(ny-1)) disturbance!(b2, b, n_x, n_y, w_l, db, dt, dx, dy)
+        end
 
         update_ghost_serial!(b2)  # this seems to be faster than the parallel version
         update_ghost_serial!(w2)
