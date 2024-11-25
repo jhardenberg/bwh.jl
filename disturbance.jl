@@ -41,7 +41,7 @@ function make_disturbed_links(nx, ny, dx, dy, ϕ)
     """
 
     M =floor(Int, ϕ*nx*ny)  # number of disturbed links
-    println("ϕ = ", ϕ, " --> Number of disturbed links: ", M , " out of ", nx*ny)
+    @info "ϕ = $ϕ --> Number of disturbed links: $M out of $(nx*ny)"
 
     xx = float_type.(rand(1:(nx-2), nx, ny)) # Random x index for disturbance
     yy = float_type.(rand(1:(ny-2), nx, ny)) # Random y index for disturbance

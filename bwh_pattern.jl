@@ -14,6 +14,7 @@ using ChangePrecision
 using GPUArraysCore  #needed for fix for Metal
 using Plots
 using Printf
+using Logging
 
 @static if USE_GPU
     if GPU_TYPE == "CUDA"
@@ -47,7 +48,9 @@ end
 
 function bwh()
 
-    println("Running with ", Threads.nthreads(), " threads")
+    logger = SimpleLogger(stdout, Logging.Debug)
+
+    @info "Running with $(Threads.nthreads()) threads"
 
     @changeprecision float_type begin  # fix for Metal (GPU on Mac). All in single precision.
 
@@ -68,13 +71,13 @@ function bwh()
     if dt == 0.0  # if dt is not set, use the estimated value
         dt = dte
     end
-    println("Estimated dt = ", dte)
-    println("Selected dt = ", dt)
+    @info "Estimated dt = $dte"
+    @info "Selected dt = $dt"
 
     # this will be for MPI
     #me, dims, nprocs, coords   = init_global_grid(nx, ny, 1, periodx=1, periody=1);
 
-    println("Simulation parameters: p=", p, " η=", η, " λ=", λ, " ρ=", ρ, " ν=", ν, " db=", db, " dw=", dw, " dt=", dt, " dx=", dx, " dy=", dy)
+    @info "Simulation parameters: p= $p, η=$η, λ=$λ ρ=$ρ ν=$ν db=$db dw=$dw dt=$dt dx=$dx dy=$dy"
 
     if flag_disturbance
         n_x, n_y, w_l = make_disturbed_links(nx, ny, dx, dy, ϕ)
@@ -136,7 +139,7 @@ function bwh()
     A_eff    = (2*2)/1e9*nx*ny*sizeof(Data.Number)  # Effective main memory access per iteration [GB]
     wtime_it = wtime/nt                        # Execution time per iteration [s]
     T_eff    = A_eff/wtime_it                       # Effective memory throughput [GB/s]
-    @printf("Total steps=%d, time=%1.3e sec (@ T_eff = %1.2f GB/s) \n", nt, wtime, round(T_eff, sigdigits=2))
+    @info @sprintf("Total steps=%d, time=%1.3e sec (@ T_eff = %1.2f GB/s) \n", nt, wtime, round(T_eff, sigdigits=2))
     
     plotb(b, dt*nt, nx, ny, lx, ly)
     savefig(filename_final_img)
