@@ -1,8 +1,10 @@
 # Description: Parameters for the Zelnik et al. model
   
 # Filenames
-filename_nc = "zelnik.nc"    # NetCDF filename
-filename_anim = "zelnik.gif" # Animation filename
+filename_nc = "zelnik.nc"          # Full data NetCDF filename
+filename_ani = "zelnik.gif"        # Animation filename
+filename_final_img = "zelnik.png"  # Animation filename
+filename_final_nc = "final.nc"     # Final netcdf filename
 
 # Zelnik et al. parameters
 
@@ -32,7 +34,7 @@ w_mean = 1.5  # mean value of w
 w_rand = 0.0  # amplitude of perturbation
 
 # Time loop
-nt    = 250000  # Number of time steps
+nt    = 150000  # Number of time steps
 nout  = 5000    # how often to print stats
 nouta = 500     # how often to save animation
 noutf = 500     # how often to save netcdf file

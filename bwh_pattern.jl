@@ -4,8 +4,8 @@
 const USE_GPU = false  # flag for GPU - does not work with Metal on Mac
 const GPU_TYPE = "Metal"  # "CUDA", "AMDGPU" or "Metal"
 const flag_netcdf = true  # flag for netcdf output
-const flag_ani = false  # flag for animation
-const flag_disturbance = false  # flag for network disturbance
+const flag_ani = true  # flag for animation
+const flag_disturbance = true  # flag for network disturbance
 
 #using ImplicitGlobalGrid   # this will be for MPI
 using ParallelStencil
@@ -139,8 +139,8 @@ function bwh()
     @printf("Total steps=%d, time=%1.3e sec (@ T_eff = %1.2f GB/s) \n", nt, wtime, round(T_eff, sigdigits=2))
     
     plotb(b, dt*nt, nx, ny, lx, ly)
-    savefig("zelnik.png")
-    to_netcdf("final.nc", b, w, nt*dt, mode="c")
+    savefig(filename_final_img)
+    to_netcdf(filename_final_nc, b, w, nt*dt, mode="c")
 
     if flag_ani
         gif(anim, filename_ani, fps = 15)
