@@ -1,9 +1,11 @@
-# run with: julia --project --check-bounds=no -O3 -t 4 bwh_pattern.jl
+# On CPU run with: julia --project --check-bounds=no -O3 -t 4 bwh_pattern.jl
 # where -t 4 is the number of threads to use
 
+# When running with Metal (on Mac Silicon) use
+# julia --project -O3 -t 4 bwh_pattern.jl
+
 const USE_GPU = false  # flag for GPU - does not work with Metal on Mac
-const GPU_TYPE = "Metal"  # "CUDA", "AMDGPU" or "Metal"
-const flag_netcdf = true  # flag for netcdf output
+const flag_netcdf = false  # flag for netcdf output
 const flag_ani = false  # flag for animation
 const flag_disturbance = false  # flag for network disturbance
 
@@ -17,16 +19,8 @@ using Printf
 using Logging
 
 @static if USE_GPU
-    if GPU_TYPE == "CUDA"
-        @init_parallel_stencil(CUDA, Float64, 2);
-        const float_type = Float64
-    elseif GPU_TYPE == "AMDGPU"
-        @init_parallel_stencil(AMDGPU, Float64, 2);
-        const float_type = Float64
-    else
-        @init_parallel_stencil(Metal, Float32, 2);
-        const float_type = Float32
-    end
+    @init_parallel_stencil(Metal, Float32, 2);
+    const float_type = Float32
 else
     @init_parallel_stencil(Threads, Float64, 2);
     const float_type = Float64
