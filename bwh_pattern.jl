@@ -3,9 +3,9 @@
 
 const USE_GPU = false  # flag for GPU - does not work with Metal on Mac
 const GPU_TYPE = "Metal"  # "CUDA", "AMDGPU" or "Metal"
-const flag_netcdf = true  # flag for netcdf output
-const flag_ani = true  # flag for animation
-const flag_disturbance = true  # flag for network disturbance
+const flag_netcdf = false  # flag for netcdf output
+const flag_ani = false  # flag for animation
+const flag_disturbance = false  # flag for network disturbance
 
 #using ImplicitGlobalGrid   # this will be for MPI
 using ParallelStencil
@@ -58,8 +58,8 @@ function bwh()
     dt = dtstep  # we have to copy it for crazy julia scope restrictions
     
     # Array initializations. Use @zeros, @ones or @rand
-    b = b_rand *@rand(nx, ny) .+ b_mean
-    w = w_rand *@rand(nx, ny) .+ w_mean
+    b = b_rand *(@rand(nx, ny) .- 0.5) .+ b_mean
+    w = w_rand *(@rand(nx, ny) .- 0.5) .+ w_mean
 
     b2 = @zeros(nx, ny);  # Temporary array for b
     w2 = @zeros(nx, ny);  # Temporary array for w
