@@ -3,7 +3,7 @@
 
 const USE_GPU = false  # flag for GPU - does not work with Metal on Mac
 const GPU_TYPE = "Metal"  # "CUDA", "AMDGPU" or "Metal"
-const flag_netcdf = false  # flag for netcdf output
+const flag_netcdf = true  # flag for netcdf output
 const flag_ani = false  # flag for animation
 const flag_disturbance = false  # flag for network disturbance
 
@@ -37,6 +37,7 @@ include("ghost.jl")
 include("plotting.jl")
 include("netcdf.jl")
 include("disturbance.jl")
+include("util.jl")
 
 function to_netcdf(fname, b, w, tim; mode="a")
     data = Dict(
@@ -48,13 +49,13 @@ end
 
 function bwh()
 
-    logger = SimpleLogger(stdout, Logging.Debug)
-
-    @info "Running with $(Threads.nthreads()) threads"
-
     @changeprecision float_type begin  # fix for Metal (GPU on Mac). All in single precision.
 
     include("params.jl")
+
+    set_loglevel(loglevel)
+
+    @info "Running with $(Threads.nthreads()) threads"
 
     nx, ny = numx + 2, numy + 2   # add 2 to each dimension for ghost cells
     dx, dy = lx/numx, ly/numy  # Space steps in x and y dimensions
@@ -72,12 +73,12 @@ function bwh()
         dt = dte
     end
     @info "Estimated dt = $dte"
-    @info "Selected dt = $dt"
+    @info "Selected  dt = $dt"
 
     # this will be for MPI
     #me, dims, nprocs, coords   = init_global_grid(nx, ny, 1, periodx=1, periody=1);
 
-    @info "Simulation parameters: p= $p, η=$η, λ=$λ ρ=$ρ ν=$ν db=$db dw=$dw dt=$dt dx=$dx dy=$dy"
+    @info "Simulation parameters: p=$p, η=$η, λ=$λ ρ=$ρ ν=$ν db=$db dw=$dw dt=$dt dx=$dx dy=$dy"
 
     if flag_disturbance
         n_x, n_y, w_l = make_disturbed_links(nx, ny, dx, dy, ϕ)
@@ -87,9 +88,13 @@ function bwh()
     # Preparation of visualisation
     if flag_ani
         ENV["GKSwstype"]="nul";
-        if isdir("viz2D_out")==false mkdir("viz2D_out") end; loadpath = "./viz2D_out/";
+        if isdir("viz2D_out")
+            rm("viz2D_out"; recursive=true)
+        end
+        mkdir("viz2D_out")
+        loadpath = "./viz2D_out/"
         anim = Animation(loadpath,String[])
-        println("Animation directory: $(anim.dir)")
+        @info "Animation directory: $(anim.dir)"
     end
 
     if flag_netcdf
@@ -140,7 +145,7 @@ function bwh()
     wtime_it = wtime/nt                        # Execution time per iteration [s]
     T_eff    = A_eff/wtime_it                       # Effective memory throughput [GB/s]
     @info @sprintf("Total steps=%d, time=%1.3e sec (@ T_eff = %1.2f GB/s) \n", nt, wtime, round(T_eff, sigdigits=2))
-    
+
     plotb(b, dt*nt, nx, ny, lx, ly)
     savefig(filename_final_img)
     to_netcdf(filename_final_nc, b, w, nt*dt, mode="c")

@@ -1,10 +1,12 @@
-# Description: Parameters for the Zelnik et al. model
+# Parameters for the Zelnik et al. model
   
 # Filenames
 filename_nc = "zelnik.nc"          # Full data NetCDF filename
 filename_ani = "zelnik.gif"        # Animation filename
 filename_final_img = "zelnik.png"  # Animation filename
 filename_final_nc = "final.nc"     # Final netcdf filename
+
+loglevel = "info"  # Logging level (debug, info, warn, error)
 
 # Zelnik et al. parameters
 
