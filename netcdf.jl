@@ -1,6 +1,6 @@
 using NCDatasets
 
-function write_to_netcdf2d(filename::String, data_dict::Dict{String, Dict{String, Any}}, tim::Float64; mode="a")
+function write_to_netcdf2d(filename::String, data_dict::Dict{String, Dict{String, Any}}, tim; mode="a")
     """
     Appends data from a dictionary to a NetCDF file with a time axis.
 
