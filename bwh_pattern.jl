@@ -110,10 +110,10 @@ function bwh()
             @parallel (2:(nx-1), 2:(ny-1)) disturbance!(b2, b, n_x, n_y, w_l, db, dt, dx, dy)
         end
 
-        update_ghost_serial!(b2)  # this seems to be faster than the parallel version
-        update_ghost_serial!(w2)
-        #update_ghost!(b2, nx, ny)
-        #update_ghost!(w2, nx, ny)
+        #update_ghost_serial!(b2)  # this seems to be faster than the parallel version
+        #update_ghost_serial!(w2)
+        update_ghost!(b2, nx, ny)
+        update_ghost!(w2, nx, ny)
 
         b, b2 = b2, b
         w, w2 = w2, w
