@@ -23,6 +23,8 @@ using Random
     return
 end
 
+@views inn(A) = A[2:end-1,2:end-1]  # view to inner part of an array
+
 function make_disturbed_links(nx, ny, dx, dy, ϕ)
     """
     Creates a set of disturbed links in the network.
@@ -43,14 +45,16 @@ function make_disturbed_links(nx, ny, dx, dy, ϕ)
     M =floor(Int, ϕ*nx*ny)  # number of disturbed links
     @info "ϕ = $ϕ --> Number of disturbed links: $M out of $(nx*ny)"
 
-    xx = float_type.(rand(1:(nx-2), nx, ny)) # Random x index for disturbance
-    yy = float_type.(rand(1:(ny-2), nx, ny)) # Random y index for disturbance
+    nnx = nx - 2
+    nny = ny - 2
+    xx = float_type.(rand(1:nnx, nx, ny) .+ 1) # Random x index for disturbance
+    yy = float_type.(rand(1:nny, nx, ny) .+ 1) # Random y index for disturbance
     n_x = reshape(1:nx, :, 1) .* ones(1, ny)  # x index
     n_y = reshape(1:ny, 1, :) .* ones(ny, 1)  # y index
     n_x0 = copy(n_x)
     n_y0 = copy(n_y)
     
-    assign_random_elements!(n_x, n_y, xx, yy, M) # Select only M links
+    assign_random_elements!(inn(n_x), inn(n_y), inn(xx), inn(yy), M) # Select only M links
 
     distx = abs.(n_x - n_x0)
     disty = abs.(n_y - n_y0)
