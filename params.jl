@@ -24,10 +24,10 @@ p = 1.55            # precipitation rate
 ϕ = 0.25            # fraction of disturbed links
 
 # Domain size
-lx, ly = 340, 340   # Length of domain in dimensions x, y
+lx, ly = 510, 510  # Length of domain in dimensions x, y
 
 # Numerics
-numx, numy = 340, 340   # Number of gridpoints in x, y
+numx, numy = 510, 510  # Number of gridpoints in x, y
 
 # Initialization
 b_mean = 0.4  # mean value of b

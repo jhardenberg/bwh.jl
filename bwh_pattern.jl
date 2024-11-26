@@ -41,7 +41,7 @@ function to_netcdf(fname, b, w, tim; mode="a")
     write_to_netcdf2d(fname, data, tim, mode=mode)
 end
 
-function bwh()
+@views function bwh()
 
     @changeprecision float_type begin  # fix for Metal (GPU on Mac). All in single precision.
 
