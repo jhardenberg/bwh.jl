@@ -24,8 +24,7 @@ function update_ghost!(b::Data.Array, nx::Data.Index, ny::Data.Index)
     return
 end
 
-#(a::Data.Array)
-function update_ghost_serial!(a)
+function update_ghost_serial!(a::Data.Array)
     # Update ghost points
     a[end,:] = a[2,:]
     a[1,:] = a[end-1,:]
