@@ -1,44 +1,60 @@
-# Parameters for the Zelnik et al. model
-  
-# Filenames
-filename_nc = "zelnik.nc"          # Full data NetCDF filename
-filename_ani = "zelnik.gif"        # Animation filename
-filename_final_img = "zelnik.png"  # Animation filename
-filename_final_nc = "final.nc"     # Final netcdf filename
+# Parameters for the model and run
+using Parameters
+@with_kw mutable struct params
+    
+    #directory where to save results
+    dir_out::String = "/work/"
+    # Filenames for the output
+    filename_nc = dir_out*"data.nc"          # Full data NetCDF filename
+    filename_ani = dir_out*"video.gif"        # Animation filename
+    filename_final_img_b = dir_out*"b_final.png"  # Final plot filename b
+    filename_final_img_w = dir_out*"w_final.png"  # Final plot filename w
+    filename_final_nc = dir_out*"final.nc"     # Final netcdf filename
+    filename_shortcuts_b=dir_out*"shortcuts_b.dat" # File where to save the shortcuts (b)
+    filename_shortcuts_w=dir_out*"shortcuts_w.dat" # File where to save the shortcuts (w)
+    animation_folder=dir_out*"viz2D_out" #temporary folder to produce animation (removed at the end of the simulation)
+    #Filenames to read the input
+    filename_shortcuts_init_b=dir_out*"shortcuts_b.dat" # File from where to read the shortcuts (b) if flag_read_disturbance=true
+    filename_shortcuts_init_w=dir_out*"shortcuts_w.dat"  #File from where to read the shortcuts (w) if flag_read_disturbance=true
+    filename_init=dir_out*"initial.nc" #File from where to read the initial condition
+ 
 
-loglevel = "info"  # Logging level (debug, info, warn, error)
+    loglevel = "info"  # Logging level (debug, info, warn, error)
 
-# Zelnik et al. parameters
+    # Zelnik et al. equation parameters
 
-# Physics
-η = 2.8             # root augmentation
-λ = 0.4571428       # soil water consumption rate
-ρ = 0.7             # shading parameter
-ν = 1.470588        # soil water evaporation rate
-db = 1.0            # b diffusivity
-dw = 125.0          # w diffusivity
+    # Physics
+    η::Float64 = 2.8             # root augmentation
+    λ::Float64 = 0.4571          # soil water consumption rate
+    ρ::Float64 = 0.7             # shading parameter
+    ν::Float64 = 1.4286          # soil water evaporation rate
+    db::Float64 = 1.0            # b diffusivity
+    dw::Float64= 125.0          # w diffusivity
 
-p = 1.55            # precipitation rate
+    p::Float64 = 1.5            # precipitation rate
 
-# Network disturbance
-ϕ = 0.25            # fraction of disturbed links
+    # Network disturbance
+    ϕ::Float64 = 0            # fraction of disturbed links
+    ϕ_set::Float64 = 0       # fraction of preset disturbed links
 
-# Domain size
-lx, ly = 510, 510  # Length of domain in dimensions x, y
+    # Domain size
+    lx::Float64 = 336
+    ly::Float64 = 336  # Length of domain in dimensions x, y
 
-# Numerics
-numx, numy = 510, 510  # Number of gridpoints in x, y
+    # Numerics
+    numx::Int64 = 400
+    numy::Int64 = 400  # Number of gridpoints in x, y
 
-# Initialization
-b_mean = 0.4  # mean value of b
-b_rand = 0.6  # amplitude of perturbation
-w_mean = 1.5  # mean value of w
-w_rand = 0.0  # amplitude of perturbation
+    # Initialization (to produce the initial condition if not read)
+    b_mean::Float64 = 0.4  # mean value of b
+    b_rand::Float64 = 0.6  # amplitude of perturbation
+    w_mean::Float64 = 1.5  # mean value of w
+    w_rand::Float64 = 0.0  # amplitude of perturbation
 
-# Time loop
-nt    = 150000  # Number of time steps
-nout  = 5000    # how often to print stats
-nouta = 500     # how often to save animation
-noutf = 500     # how often to save netcdf file
-
-dtstep = 0.001  # time step. If set to 0.0 the code will estimate the time step
+    # Time loop
+    dtstep::Float64 = 0.001  # time step. If set to 0.0 the code will estimate the time step
+    nt::Int64    = 2500  # Number of adimensional times
+    nout::Int64  = 1000    # how often to print stats (in time steps)
+    nouta::Int64 = 5000    # how often to save animation (in time steps)
+    noutf::Int64 = 1000    # how often to save netcdf file (in time steps)
+end

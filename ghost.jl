@@ -1,3 +1,4 @@
+#This file handles the ghost points necessary for periodic boundary conditions on parallel computing
 # Update ghost points
 
 @parallel_indices (ix) function update_ghost_x!(a::Data.Array)

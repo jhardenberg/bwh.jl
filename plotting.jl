@@ -9,6 +9,11 @@ end
 
 function plotb(b, t, nx, ny, lx, ly)
     X, Y      = -lx/2:lx/(nx-2):lx/2, -ly/2:ly/(ny-2):ly/2
-    heatmap(X, Y, Array(b)[2:(end), 2:(end)]', aspect_ratio=1, clim=(0, 0.65), xlims=(X[1],X[end]), ylims=(Y[1],Y[end]), c=:viridis, title="b field - time = $t")
+    heatmap(X, Y, Array(b)[2:(end), 2:(end)]', aspect_ratio=1, clim=(0, 1), xlims=(X[1],X[end]), ylims=(Y[1],Y[end]), c=(:speed), title="b field - time = $t", colorbar_title="b", ticks=false)
+end
+
+function plotw(w, t, nx, ny, lx, ly)
+    X, Y      = -lx/2:lx/(nx-2):lx/2, -ly/2:ly/(ny-2):ly/2
+    heatmap(X, Y, Array(w)[2:(end), 2:(end)]', aspect_ratio=1, clim=(0.7,1.2), xlims=(X[1],X[end]), ylims=(Y[1],Y[end]), c=(:roma), title="w field - time = $t", colorbar_title="w", ticks=false)
 end
 
