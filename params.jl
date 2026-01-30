@@ -1,27 +1,24 @@
-# Parameters for the model and run
+# Parameters for the Zelnik et al. model
 using Parameters
 @with_kw mutable struct params
-    
-    #directory where to save results
-    dir_out::String = "/work/"
-    # Filenames for the output
-    filename_nc = dir_out*"data.nc"          # Full data NetCDF filename
-    filename_ani = dir_out*"video.gif"        # Animation filename
+
+    dir_out::String = "/work/users/sfilippini/"
+    # Filenames
+    filename_nc = dir_out*"zelnik.nc"          # Full data NetCDF filename
+    filename_ani = dir_out*"zelnik.gif"        # Animation filename
     filename_final_img_b = dir_out*"b_final.png"  # Final plot filename b
     filename_final_img_w = dir_out*"w_final.png"  # Final plot filename w
     filename_final_nc = dir_out*"final.nc"     # Final netcdf filename
     filename_shortcuts_b=dir_out*"shortcuts_b.dat" # File where to save the shortcuts (b)
-    filename_shortcuts_w=dir_out*"shortcuts_w.dat" # File where to save the shortcuts (w)
-    animation_folder=dir_out*"viz2D_out" #temporary folder to produce animation (removed at the end of the simulation)
-    #Filenames to read the input
     filename_shortcuts_init_b=dir_out*"shortcuts_b.dat" # File from where to read the shortcuts (b) if flag_read_disturbance=true
+    filename_shortcuts_w=dir_out*"shortcuts_w.dat" # File where to save the shortcuts (w)
     filename_shortcuts_init_w=dir_out*"shortcuts_w.dat"  #File from where to read the shortcuts (w) if flag_read_disturbance=true
-    filename_init=dir_out*"initial.nc" #File from where to read the initial condition
- 
+    filename_init=dir_out*"initial.nc"
+    animation_file=dir_out*"viz2D_out"
 
     loglevel = "info"  # Logging level (debug, info, warn, error)
 
-    # Zelnik et al. equation parameters
+    # Zelnik et al. parameters
 
     # Physics
     η::Float64 = 2.8             # root augmentation
@@ -34,8 +31,10 @@ using Parameters
     p::Float64 = 1.5            # precipitation rate
 
     # Network disturbance
-    ϕ::Float64 = 0            # fraction of disturbed links
-    ϕ_set::Float64 = 0       # fraction of preset disturbed links
+    ϕb::Float64 = 0            # fraction of disturbed links
+    ϕb_set::Float64 = 0       # fraction of preset disturbed links
+    ϕw::Float64 = 0            # fraction of disturbed links
+    ϕw_set::Float64 = 0       # fraction of preset disturbed links
 
     # Domain size
     lx::Float64 = 336
@@ -45,7 +44,7 @@ using Parameters
     numx::Int64 = 400
     numy::Int64 = 400  # Number of gridpoints in x, y
 
-    # Initialization (to produce the initial condition if not read)
+    # Initialization
     b_mean::Float64 = 0.4  # mean value of b
     b_rand::Float64 = 0.6  # amplitude of perturbation
     w_mean::Float64 = 1.5  # mean value of w

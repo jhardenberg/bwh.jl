@@ -1,4 +1,5 @@
 using Random
+using StatsBase
 
 # Function for ParallelStencil to add disturbance to the field
 @parallel_indices (ix, iy) function disturbance!(b2::Data.Array, b::Data.Array, n_x::Data.Array, n_y::Data.Array, ww::Data.Array, dd::Data.Number, dt::Data.Number, dx::Data.Number, dy::Data.Number)
@@ -129,20 +130,8 @@ end
 
 function add_disturbances(n_x_1,n_y_1, n_x_2, n_y_2, nx,ny)
     #slightly underestimates the number of shortcuts, if a link is in both matrices then it appears only once in the final
-    """
-    Add two diffusion matrices 
-
-    Args:
-      n_x_1: The x indices of the diffusion matrix 1
-      n_y_1: The y indices of the diffusion matrix 1
-      n_x_2: The x indices of the diffusion matrix 2
-      n_y_2: The y indices of the diffusion matrix 2
-      nx,ny: matrix sizes
-    """
-    n_x_0=@zeros(nx,ny)
-    n_y_0=@zeros(nx,ny)
-    n_x_0 .= Data.Array(reshape(1:nx, :, 1) .* ones(1, ny))  # x index
-    n_y_0 .= Data.Array(reshape(1:ny, 1, :) .* ones(ny, 1))  # y index
+    n_x_0=reshape(1:nx, :, 1) .* ones(1, ny)  # x index
+    n_y_0=reshape(1:ny, 1, :) .* ones(ny, 1)  # y index
 
     mask_dist_2=(n_x_2.!=Int.(n_x_0))
     mask_dist_1=(n_x_1.!=Int.(n_x_0))
@@ -158,4 +147,38 @@ function add_disturbances(n_x_1,n_y_1, n_x_2, n_y_2, nx,ny)
     mask_dist_2=mask_dist_2.*(mask_no_double_links)
     n_y=(n_y_2.*mask_dist_2)+(n_y_1.*mask_dist_1)+(n_y_0.*mask_dist_0)
     return n_x,n_y
+end
+
+function remove_disturbances(n_x, n_y, nx, ny, M_r)
+
+    #create normal indexes
+    n_x_0 = reshape(1:nx, :, 1) .* ones(1, ny)  # x index
+    n_y_0 = reshape(1:ny, 1, :) .* ones(ny, 1)  # y index
+
+    #flatten arrays
+    f_n_x=reshape(n_x, nx*ny)
+    f_n_y=reshape(n_y, nx*ny)
+    f_n_x0=reshape(n_x_0, nx*ny)
+    f_n_y0=reshape(n_y_0,  nx*ny)
+
+    #collect shortcut positions
+    bool=collect(f_n_x.!=f_n_x0)
+    randoms=findall(x->x==1, bool)
+    
+    #sample M_r shortcuts to remove
+    r_1=sample(randoms, M_r, replace=false)
+    #find what each shortcut is connect to 
+    r_2=f_n_x[r_1].+((f_n_y[r_1].-1)*nx)
+
+    #remove possible duplicates
+    r=vcat(r_1, r_2)
+    r=unique(r)
+
+    #reset and reshape
+    f_n_x[Int.(r)] .= f_n_x0[Int.(r)]
+    f_n_y[Int.(r)] .= f_n_y0[Int.(r)]
+    n_x_out=reshape(f_n_x, (nx,ny))
+    n_y_out=reshape(f_n_y, (nx,ny))
+
+  return n_x_out, n_y_out
 end
