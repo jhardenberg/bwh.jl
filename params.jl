@@ -3,7 +3,7 @@ using Parameters
 @with_kw mutable struct params
     
     #directory where to save results
-    dir_out::String = "/work/"
+    dir_out::String = "./out/"
     # Filenames for the output
     filename_nc = dir_out*"data.nc"          # Full data NetCDF filename
     filename_ani = dir_out*"video.gif"        # Animation filename
@@ -17,7 +17,6 @@ using Parameters
     filename_shortcuts_init_b=dir_out*"shortcuts_b.dat" # File from where to read the shortcuts (b) if flag_read_disturbance=true
     filename_shortcuts_init_w=dir_out*"shortcuts_w.dat"  #File from where to read the shortcuts (w) if flag_read_disturbance=true
     filename_init=dir_out*"initial.nc" #File from where to read the initial condition
- 
 
     loglevel = "info"  # Logging level (debug, info, warn, error)
 
@@ -38,12 +37,12 @@ using Parameters
     ϕ_set::Float64 = 0       # fraction of preset disturbed links
 
     # Domain size
-    lx::Float64 = 336
-    ly::Float64 = 336  # Length of domain in dimensions x, y
+    lx::Float64 = 168
+    ly::Float64 = 168  # Length of domain in dimensions x, y
 
     # Numerics
-    numx::Int64 = 400
-    numy::Int64 = 400  # Number of gridpoints in x, y
+    numx::Int64 = 200
+    numy::Int64 = 200  # Number of gridpoints in x, y
 
     # Initialization (to produce the initial condition if not read)
     b_mean::Float64 = 0.4  # mean value of b
@@ -53,7 +52,7 @@ using Parameters
 
     # Time loop
     dtstep::Float64 = 0.001  # time step. If set to 0.0 the code will estimate the time step
-    nt::Int64    = 2500  # Number of adimensional times
+    nt::Int64    = 100     # Number of adimensional times
     nout::Int64  = 1000    # how often to print stats (in time steps)
     nouta::Int64 = 5000    # how often to save animation (in time steps)
     noutf::Int64 = 1000    # how often to save netcdf file (in time steps)

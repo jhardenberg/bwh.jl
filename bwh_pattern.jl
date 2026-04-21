@@ -9,7 +9,7 @@ const flag_netcdf = false  # flag for netcdf output full data (final always prod
 const flag_ani = true  # flag for animation
 const flag_read_init = false # flag to read the initial condition from file
 const flag_disturbance_b = false  # flag for network disturbance on biomass diffusion
-const flag_disturbance_w = true # flag for network disturbance on water diffusion
+const flag_disturbance_w = false # flag for network disturbance on water diffusion
 const flag_read_disturbance_b =  false # flags to read from file network disturbances on biomass diffusion
 const flag_read_disturbance_w = false # flag to read from file network disturbance on water diffusion
 const flag_add_disturbances_b =false #flags to add new links to the ones read from file on biomass diffusion
@@ -30,6 +30,7 @@ using Logging
 using DelimitedFiles
 using Parameters
 using Statistics
+using NCDatasets
 
 @static if USE_GPU
     @init_parallel_stencil(CUDA, Float64, 2);
@@ -84,8 +85,6 @@ end
         #w0=mean(w)
         #@info "Random initialization array <b>=$b0, <w>=$w0"
     end 
-
-    
 
     b2 = @zeros(nx, ny);  # Temporary array for b
     w2 = @zeros(nx, ny);  # Temporary array for w
@@ -214,8 +213,8 @@ end
         w, w2 = w2, w
         #print on the log
         if mod(it,P.nout)==0
-            #@printf("t = %7.2f b = [%10.8f, %10.8f]  w = [%10.8f, %10.8f]\n", it*dt, minimum(b), maximum(b), minimum(w), maximum(w))
-            @printf("t = %7.2f\n", it*dt)
+            @printf("t = %7.2f b = [%10.8f, %10.8f]  w = [%10.8f, %10.8f]\n", it*dt, minimum(b), maximum(b), minimum(w), maximum(w))
+            #@printf("t = %7.2f\n", it*dt)
         end
         #write on full data file
         if flag_netcdf && mod(it,P.noutf)==0
