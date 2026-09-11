@@ -1,6 +1,7 @@
 include("./bwh_pattern.jl")
 using NCDatasets
 #set the parameters
-#ϕ will be interpreted as either ϕ_b or ϕ_w depending on the flag settings in bwh_pattern.jl
-P=params(p=1.5, ϕ=0.01, nt=5000)
-bwh(p)
+#run a simulation with two identical species except for dispersal method. The seed dispersing species has
+#a characteristic dispersal distance of 3 non-dimensional units
+P=params(p=1.5, ls=3, nt=5000)
+bwh(P)

@@ -7,13 +7,24 @@ function plotbwh(b, w, nx, ny, ttot)
     display(plot(h1, h2, layout = l))
 end
 
-function plotb(b, t, nx, ny, lx, ly)
+function plotb(b, t, nx, ny, lx, ly, p)
     X, Y      = -lx/2:lx/(nx-2):lx/2, -ly/2:ly/(ny-2):ly/2
-    heatmap(X, Y, Array(b)[2:(end), 2:(end)]', aspect_ratio=1, clim=(0, 1), xlims=(X[1],X[end]), ylims=(Y[1],Y[end]), c=(:speed), title="b field - time = $t", colorbar_title="b", ticks=false)
+    p_print=round(p, digits=4)
+    heatmap(X, Y, Array(b)[2:(end), 2:(end)]', aspect_ratio=1, clim=(0, 1), xlims=(X[1],X[end]), ylims=(Y[1],Y[end]), c=(:speed), title="b field - time = $t - p = $p_print", colorbar_title="b", ticks=false)
 end
 
-function plotw(w, t, nx, ny, lx, ly)
+function plotw(w, t, nx, ny, lx, ly, p)
     X, Y      = -lx/2:lx/(nx-2):lx/2, -ly/2:ly/(ny-2):ly/2
-    heatmap(X, Y, Array(w)[2:(end), 2:(end)]', aspect_ratio=1, clim=(0.7,1.2), xlims=(X[1],X[end]), ylims=(Y[1],Y[end]), c=(:roma), title="w field - time = $t", colorbar_title="w", ticks=false)
+    p_print=round(p, digits=4)
+    heatmap(X, Y, Array(w)[2:(end), 2:(end)]', aspect_ratio=1, clim=(0.7,1.2), xlims=(X[1],X[end]), ylims=(Y[1],Y[end]), c=(:roma), title="w field - time = $t - p = $p_print", colorbar_title="w", ticks=false)
 end
 
+function plot_shortcuts(distances)
+    rows_dist, cols_dist=size(distances)
+    distances=vec(reshape(distances,(1,rows_dist*cols_dist)))
+    distances=distances[distances.>0]
+    distances=floor.(distances).*1 .+ 0.5
+    norm=length(distances)
+    c=counter(distances)
+    scatter(collect(keys(c)), collect(values(c))./norm)
+end
