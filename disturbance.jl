@@ -2,7 +2,7 @@ using Random
 using StatsBase
 
 # Function for ParallelStencil to add disturbance to the field
-@parallel_indices (ix, iy) function disturbance!(b2::Data.Array, b::Data.Array, n_x::Data.Array, n_y::Data.Array, ww::Data.Array, dd::Data.Number, dt::Data.Number, dx::Data.Number, dy::Data.Number)
+@parallel_indices (ix, iy) function disturbance!(b2::Data.Array, b::Data.Array, n_x::Data.Array, n_y::Data.Array, dd::Data.Number, dt::Data.Number, dx::Data.Number, dy::Data.Number)
     """
     Adds a disturbance to the field b2 at the indices ix and iy.
     Uses ParallelStencil index notation.
@@ -20,7 +20,31 @@ using StatsBase
     """
     iix = Int(n_x[ix, iy])
     iiy = Int(n_y[ix, iy])
-    b2[ix, iy] = b2[ix, iy] + dt*dd*(b[iix, iiy] - b[ix, iy])*(ww[ix, iy])  # weights inverted and dx*dy included in w_t 
+    b2[ix, iy] = b2[ix, iy] + (dt/(dx*dy))*dd*(b[iix, iiy] - b[ix, iy])
+    return
+end
+
+# Function for ParallelStencil to add disturbance to the field weighed with distance
+@parallel_indices (ix, iy) function disturbance_with_dists!(b2::Data.Array, b::Data.Array, n_x::Data.Array, n_y::Data.Array, dist::Data.Array, dd::Data.Number, ddf::Data.Number, dt::Data.Number, dx::Data.Number, dy::Data.Number)
+    """
+    Adds a disturbance to the field b2 at the indices ix and iy.
+    Uses ParallelStencil index notation.
+
+    Args:
+        b2: The destination field to add the disturbance to.
+        b: The original field at the previous timestep
+        n_x: The x indices of the disturbed links.
+        n_y: The y indices of the disturbed links.
+        dist: The physical length of the shortcuts (for teh weigths)
+        dd: Diffusion parameter.
+        ddf: Fast diffusion parameter.
+        dt: The time step.
+        dx: The spatial step between nodes in the x direction.
+        dy: The spatial step between nodes in the y direction.
+    """
+    iix = Int(n_x[ix, iy])
+    iiy = Int(n_y[ix, iy])
+    b2[ix, iy] = b2[ix, iy] + (dt/(dx*dy))*ddf*(b[iix, iiy] - b[ix, iy])/(dist[ix, iy])  # weights inverted and dx*dy included in w_t 
     return
 end
 
@@ -45,7 +69,7 @@ end
 
 @views inn(A) = A[2:end-1,2:end-1]  # view to inner part of an array
 
-function make_disturbed_links(nx, ny, dx, dy, ϕ)
+function make_disturbed_links(nx, ny, ϕ, sigma)
     """
     Creates a set of disturbed links in the network.
 
@@ -77,21 +101,20 @@ function make_disturbed_links(nx, ny, dx, dy, ϕ)
     n_y0 = copy(n_y)
     
     # Assigns M random elements. M links
-    assign_random_elements!(inn(n_x), inn(n_y), inn(xx), inn(yy), M) # Select only M links
+    if sigma==1
+        assign_random_elements!(inn(n_x), inn(n_y), inn(xx), inn(yy), M) # Select only M links
+    else
+        assign_random_elements_by_distance!(inn(n_x), inn(n_y), M, sigma, nnx, nny) # Select only M links
+    end
 
     distx = abs.(n_x - n_x0)
     disty = abs.(n_y - n_y0)
     distx = min.(distx, nx .- distx).^2
     disty = min.(disty, ny .- disty).^2
-    ww = distx .+ disty  # link weights
-    ww[ww .== 0.0] .= 1.0   # avoid division by zero
-    ww = 1.0 ./ (ww*dx*dy)  # weights inverted and dx*dy included in d_t
+    dist= sqrt.(distx .+ disty)
+    dist[dist .== 0.0] .= 1.0   # avoid division by zero
 
-    ww = Data.Array(ww)  # Convert to a parallel data array
-    n_x = Data.Array(n_x)  # Convert to a parallel data array
-    n_y = Data.Array(n_y)  # Convert to a parallel data array 
-
-    return n_x, n_y, ww
+    return n_x, n_y, dist
 end
 
 function assign_random_elements!(dd1, dd2, ss1, ss2, M)
@@ -127,6 +150,66 @@ function assign_random_elements!(dd1, dd2, ss1, ss2, M)
 
   return
 end
+
+function assign_random_elements_by_distance!(dd1, dd2, M, sigma, nnx,nny)
+    """
+  Assigns M random elements of matrices ss1 and ss2 to the corresponding 
+  values in matrices dd1 and dd2 respectively. 
+    
+  Args:
+    dd1: The first destination matrix.
+    dd2: The second destination matrix.
+    M: The number of random elements to assign.
+    sigma: std of the gaussian
+  """
+    
+    
+    
+    # Get the dimensions of the matrices
+    rows_dd1, cols_dd1 = size(dd1)
+    dd1_0=copy(dd1)
+    dd2_0=copy(dd2)
+    # Generate M unique random linear indices
+    indices = randperm(rows_dd1 * cols_dd1)[1:M]
+    
+    random_1 = randperm(rows_dd1 * cols_dd1)[1:M]
+    sigma_scaled=sigma*(sqrt(nnx^2+nny^2)/2)
+    global random_2=[]
+    global distances=[]
+    #collect all linear indices not included in random_1
+    global other_indices=collect(1:1:(rows_dd1*cols_dd1))
+    global other_indices=setdiff(other_indices, random_1)
+    for r_1 in random_1
+        #get a matrix of distances from r_1
+        distx=(dd1_0.-dd1_0[r_1])
+        disty=(dd2_0.-dd2_0[r_1])
+        distx = min.(distx, nnx .- distx).^2
+        disty = min.(disty, nny .- disty).^2
+        dist=sqrt.(distx.+disty)
+        dist=vec(reshape(dist,(1,rows_dd1*cols_dd1)))
+        temp=copy(dist)
+        #get list only of indices left
+        dist=dist[other_indices]
+        #get weigths based on gaussian
+        gaussian_weights=(1/sqrt(2*pi)*sigma_scaled)*exp.(-((dist).^2)./(2*(sigma_scaled.^2)))
+        gaussian_weights=ProbabilityWeights((1/sum(gaussian_weights)).*gaussian_weights)
+        #sample another linear index
+        r_2=sample(other_indices, gaussian_weights)
+        #append the linear index and the distance
+        #append!(random_2,r_2)
+        #d=temp[r_2]
+        #append!(distances, d)
+        #modify matrices accordingly
+        dd1[r_1]=dd1_0[r_2]
+        dd2[r_1]=dd2_0[r_2]
+        dd1[r_2]=dd1_0[r_1]
+        dd2[r_2]=dd2_0[r_1]
+        #remove index from list of available
+        global other_indices=setdiff(other_indices, r_2)
+    end
+    return
+end
+
 
 function add_disturbances(n_x_1,n_y_1, n_x_2, n_y_2, nx,ny)
     #slightly underestimates the number of shortcuts, if a link is in both matrices then it appears only once in the final
