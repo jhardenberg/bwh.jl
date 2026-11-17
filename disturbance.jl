@@ -69,7 +69,7 @@ end
 
 @views inn(A) = A[2:end-1,2:end-1]  # view to inner part of an array
 
-function make_disturbed_links(nx, ny, ϕ, sigma)
+function make_disturbed_links(nx, ny, ϕ, sigma, dx, dy)
     """
     Creates a set of disturbed links in the network.
 
@@ -109,8 +109,8 @@ function make_disturbed_links(nx, ny, ϕ, sigma)
 
     distx = abs.(n_x - n_x0)
     disty = abs.(n_y - n_y0)
-    distx = min.(distx, nx .- distx).^2
-    disty = min.(disty, ny .- disty).^2
+    distx = (min.(distx, nx .- distx).*dx).^2
+    disty = (min.(disty, ny .- disty).*dy).^2
     dist= sqrt.(distx .+ disty)
     dist[dist .== 0.0] .= 1.0   # avoid division by zero
 

@@ -149,7 +149,7 @@ end
             n_y_b = reshape(shortcuts[:,2],nx,ny)
             w_l_b = reshape(shortcuts[:,3],nx,ny)
             if P.ϕb_add>0
-                n_x_b2, n_y_b2, dist_b = make_disturbed_links(nx, ny, P.ϕb_add, P.sigma_b)
+                n_x_b2, n_y_b2, dist_b = make_disturbed_links(nx, ny, P.ϕb_add, P.sigma_b, dx, dy)
                 n_x_b, n_y_b=add_disturbances(n_x_b,n_y_b, n_x_b2, n_y_b2, nx,ny)
             end
             if P.ϕb_rem>0
@@ -157,7 +157,7 @@ end
                 n_x_b, n_y_b=remove_disturbances(n_x_b, n_y_b, nx, ny, M_r)
             end
         else
-            n_x_b, n_y_b, dist_b = make_disturbed_links(nx, ny, P.ϕb, P.sigma_b)
+            n_x_b, n_y_b, dist_b = make_disturbed_links(nx, ny, P.ϕb, P.sigma_b, dx, dy)
         end
         if flag_plot_shortcuts_b
             plot_shortcuts(dist_b)
@@ -177,7 +177,7 @@ end
             n_y_w = reshape(shortcuts[:,2],nx,ny)
             w_l_w = reshape(shortcuts[:,3],nx,ny)
             if P.ϕw_add>0
-                n_x_w2, n_y_w2, dist_w = make_disturbed_links(nx, ny, P.ϕw_add, P.sigma_w)
+                n_x_w2, n_y_w2, dist_w = make_disturbed_links(nx, ny, P.ϕw_add, P.sigma_w, dx, dy)
                 n_x_w, n_y_w=add_disturbances(n_x_w,n_y_w, n_x_w2, n_y_w2, nx,ny)
             end
             if P.ϕw_rem>0
@@ -185,7 +185,7 @@ end
                 n_x_w, n_y_w=remove_disturbances(n_x_w, n_y_w, nx, ny, M_r)
             end
         else
-            n_x_w, n_y_w, dist_w = make_disturbed_links(nx, ny, P.ϕw, P.sigma_w)
+            n_x_w, n_y_w, dist_w = make_disturbed_links(nx, ny, P.ϕw, P.sigma_w, dx, dy)
         end
         if flag_plot_shortcuts_w
             plot_shortcuts(dist_w)
@@ -304,8 +304,10 @@ end
     wtime_it = wtime/nt                        # Execution time per iteration [s]
     T_eff    = A_eff/wtime_it                       # Effective memory throughput [GB/s]
     @info @sprintf("Total steps=%d, time=%1.3e sec (@ T_eff = %1.2f GB/s) \n", nt, wtime, round(T_eff, sigdigits=2))
-
-    plotb(b, round(dt*nt), nx, ny, P.lx, P.ly, p_array[end])
+    
+    
+    p = P.p_mode in ("linear", "quadratic", "smoothed") ? p_array[end] : P.p
+    plotb(b, round(dt*nt), nx, ny, P.lx, P.ly, p)
     savefig(P.filename_final_img_b)
     plotw(w, round(dt*nt), nx, ny, P.lx, P.ly, p_array[end])
     savefig(P.filename_final_img_w)
